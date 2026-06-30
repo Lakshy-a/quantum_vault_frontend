@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #0b0c0e;
+    --bg2: #111316;
+    --bg3: #161a1f;
+    --bg4: #1c2028;
+    --ink: #f0ede6;
+    --ink2: #a09c94;
+    --ink3: #5c5850;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --green: #3dba7e;
+    --blue: #4f9cf0;
+    --red: #e05a5a;
+    --bd: rgba(255,255,255,0.06);
+    --bd2: rgba(255,255,255,0.094);
+    --topbar-bg: rgba(11,12,14,0.92);
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  [data-theme="light"] {
+    --bg: #faf8f5;
+    --bg2: #f0ece5;
+    --bg3: #e6e1d8;
+    --bg4: #d6d0c5;
+    --ink: #1a1510;
+    --ink2: #4a4540;
+    --ink3: #7a756e;
+    --accent: #8b5e1a;
+    --accent2: #a87020;
+    --green: #1a7a44;
+    --blue: #1a5a9a;
+    --red: #a03030;
+    --bd: rgba(0,0,0,0.12);
+    --bd2: rgba(0,0,0,0.18);
+    --topbar-bg: rgba(250,248,245,0.94);
+    --shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  [data-theme="midnight"] {
+    --bg: #050608;
+    --bg2: #0a0b0f;
+    --bg3: #0f1118;
+    --bg4: #141620;
+    --ink: #e8e4f0;
+    --ink2: #8884a0;
+    --ink3: #484460;
+    --accent: #8b6ef0;
+    --accent2: #a88ef8;
+    --green: #3dba7e;
+    --blue: #4f9cf0;
+    --red: #e05a5a;
+    --bd: rgba(255,255,255,0.06);
+    --bd2: rgba(255,255,255,0.10);
+    --topbar-bg: rgba(5,6,8,0.92);
+    --shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  [data-theme="forest"] {
+    --bg: #0a0e0b;
+    --bg2: #0f1510;
+    --bg3: #141c15;
+    --bg4: #1a231c;
+    --ink: #e4f0e6;
+    --ink2: #8aA08c;
+    --ink3: #4a604c;
+    --accent: #6ec87a;
+    --accent2: #8ee89a;
+    --green: #3dba7e;
+    --blue: #4f9cf0;
+    --red: #e05a5a;
+    --bd: rgba(255,255,255,0.06);
+    --bd2: rgba(255,255,255,0.10);
+    --topbar-bg: rgba(10,14,11,0.92);
+    --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Figtree', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--ink3); border-radius: 2px; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-fade { animation: fadeIn 0.35s ease; }
+
+/* Mobile hamburger animation */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mobile-menu-open { animation: slideDown 0.2s ease; }
+
+/* Admin sidebar animation */
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.admin-slide { animation: slideRight 0.25s ease; }
+
+/* Select styling for light theme */
+select option { background: var(--bg2); color: var(--ink); }
+
+/* Media never overflows its container */
+img, video, canvas { max-width: 100%; height: auto; }
+
+/* Comfortable tap targets on touch devices (coarse pointer) — desktop look is untouched */
+@media (hover: none) and (pointer: coarse) {
+  button, a, select, [role="button"] { min-height: 40px; }
+}
