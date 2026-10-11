@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Page, NoteConfig } from '@/lib/types';
 import { HoverButton, HoverChip, HoverNoteRow, HoverDownloadBtn } from './Hover';
+import { api, fileHref } from '@/lib/api';
 
 interface NotesPageProps { onNav: (page: Page) => void; onToast: (msg: string) => void; notes: NoteConfig[]; }
 
@@ -9,6 +10,12 @@ export function NotesPage({ onNav, onToast, notes }: NotesPageProps) {
   const [activeType, setActiveType] = useState('All Types');
   const [activeBranch, setActiveBranch] = useState('All Branches');
   const [search, setSearch] = useState('');
+
+  const openNote = (n: NoteConfig) => {
+    if (!n.fileUrl) return onToast('No file attached to this note yet');
+    api.notes.download(n.id).catch(() => {}); // best-effort download counter
+    window.open(fileHref(n.fileUrl), '_blank', 'noopener');
+  };
   const types = ['All Types', 'Handwritten', 'Typed PDF', 'Slides'];
   const brs = ['All Branches', 'CS/IT', 'EC', 'ME'];
   const filtered = notes.filter(n => (activeType === 'All Types' || n.type === activeType) && (activeBranch === 'All Branches' || (activeBranch === 'CS/IT' && n.branch.startsWith('CS')) || (activeBranch === 'EC' && n.branch.startsWith('EC')) || (activeBranch === 'ME' && n.branch.startsWith('ME'))) && (!search || n.title.toLowerCase().includes(search.toLowerCase())));
@@ -49,7 +56,7 @@ export function NotesPage({ onNav, onToast, notes }: NotesPageProps) {
             </div>
             <div className="note-right-section" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
               <span className="note-size-label" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: 'var(--ink3)' }}>{n.size}</span>
-              <HoverDownloadBtn onClick={e => { e?.stopPropagation(); onToast('Download started!'); }} />
+              <HoverDownloadBtn onClick={e => { e?.stopPropagation(); openNote(n); }} />
             </div>
           </HoverNoteRow>
         ))}

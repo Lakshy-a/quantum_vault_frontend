@@ -1,10 +1,17 @@
 import { getToken } from './auth';
 import type {
   BranchConfig, PaperConfig, NoteConfig, BranchSyllabusConfig,
-  ThemeConfig, CustomPageConfig, SiteConfig,
+  ThemeConfig, CustomPageConfig, SiteConfig, SubmissionConfig,
 } from './types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+/** Resolve a stored fileUrl to an absolute link. Local uploads are saved as
+ *  `/uploads/<file>` on the backend origin (outside the `/api` prefix). */
+export function fileHref(url: string): string {
+  if (/^https?:\/\//.test(url)) return url;
+  return BASE.replace(/\/api\/?$/, '') + url;
+}
 
 // --- Low-level fetch helpers ---
 
@@ -57,21 +64,83 @@ export interface NoteQuery {
   limit?: number;
 }
 
+// --- Request payloads (must match backend DTOs exactly — the API rejects unknown fields) ---
+
+export interface ThemeInput {
+  themeId: string;
+  label: string;
+  preview: string;
+  isDark?: boolean;
+  vars?: Record<string, string>;
+}
+
+export interface BranchInput {
+  code: string;
+  label: string;
+  icon?: string;
+  dot?: string;
+  paperCount?: number;
+  sortOrder?: number;
+}
+
+export interface PaperInput {
+  title: string;
+  code: string;
+  branch: string;
+  semester: number;
+  year: string;
+  color?: string;
+  textColor?: string;
+  size?: string;
+  fileUrl?: string;
+}
+
+export interface NoteInput {
+  title: string;
+  branch: string;
+  type: string;
+  pages?: string;
+  branchColor?: string;
+  branchText?: string;
+  size?: string;
+  fileUrl?: string;
+}
+
+export interface ApproveSubmissionInput {
+  kind: 'paper' | 'note';
+  title: string;
+  branch: string;
+  // paper
+  code?: string;
+  semester?: number;
+  year?: string;
+  // note
+  noteType?: string;
+  pages?: string;
+}
+
+export interface CredentialsInput {
+  currentPassword: string;
+  newAdminId?: string;
+  newPassword?: string;
+}
+
 // --- Auth ---
 
 export const api = {
   auth: {
     login: (adminId: string, password: string) =>
       post<{ access_token: string; expires_in: string }>('/auth/login', { adminId, password }),
-    changePassword: (newPassword: string) =>
-      patch<void>('/auth/password', { newPassword }),
+    /** Returns a fresh token — older tokens stop working after this call. */
+    updateCredentials: (data: CredentialsInput) =>
+      patch<{ access_token: string; expires_in: string }>('/auth/credentials', data),
   },
 
   // --- Branches ---
   branches: {
     list: () => get<BranchConfig[]>('/branches'),
-    create: (data: Partial<BranchConfig>) => post<BranchConfig>('/branches', data),
-    update: (id: number, data: Partial<BranchConfig>) => patch<BranchConfig>(`/branches/${id}`, data),
+    create: (data: BranchInput) => post<BranchConfig & { id: number }>('/branches', data),
+    update: (id: number, data: Partial<BranchInput>) => patch<BranchConfig>(`/branches/${id}`, data),
     remove: (id: number) => del<{ deleted: boolean }>(`/branches/${id}`),
   },
 
@@ -83,8 +152,8 @@ export const api = {
       return get<Paginated<PaperConfig>>(`/papers?${params}`);
     },
     get: (id: string) => get<PaperConfig>(`/papers/${id}`),
-    create: (data: Partial<PaperConfig>) => post<PaperConfig>('/papers', data),
-    update: (id: string, data: Partial<PaperConfig>) => patch<PaperConfig>(`/papers/${id}`, data),
+    create: (data: PaperInput) => post<PaperConfig>('/papers', data),
+    update: (id: string, data: Partial<PaperInput>) => patch<PaperConfig>(`/papers/${id}`, data),
     remove: (id: string) => del<{ deleted: boolean }>(`/papers/${id}`),
     download: (id: string) => post<void>(`/papers/${id}/download`),
   },
@@ -97,8 +166,8 @@ export const api = {
       return get<Paginated<NoteConfig>>(`/notes?${params}`);
     },
     get: (id: string) => get<NoteConfig>(`/notes/${id}`),
-    create: (data: Partial<NoteConfig>) => post<NoteConfig>('/notes', data),
-    update: (id: string, data: Partial<NoteConfig>) => patch<NoteConfig>(`/notes/${id}`, data),
+    create: (data: NoteInput) => post<NoteConfig>('/notes', data),
+    update: (id: string, data: Partial<NoteInput>) => patch<NoteConfig>(`/notes/${id}`, data),
     remove: (id: string) => del<{ deleted: boolean }>(`/notes/${id}`),
     download: (id: string) => post<void>(`/notes/${id}/download`),
   },
@@ -110,14 +179,14 @@ export const api = {
     createBranch: (data: Partial<BranchSyllabusConfig>) => post<BranchSyllabusConfig>('/syllabus', data),
     removeBranch: (id: number) => del<{ deleted: boolean }>(`/syllabus/${id}`),
     addSubject: (semesterId: number, name: string, code: string) =>
-      post('/syllabus/subjects', { semesterId, name, code }),
+      post<{ id: number; name: string; code: string }>('/syllabus/subjects', { semesterId, name, code }),
     removeSubject: (id: number) => del(`/syllabus/subjects/${id}`),
   },
 
   // --- Themes ---
   themes: {
     list: () => get<ThemeConfig[]>('/themes'),
-    create: (data: Partial<ThemeConfig>) => post<ThemeConfig>('/themes', data),
+    create: (data: ThemeInput) => post<ThemeInput & { id: number }>('/themes', data),
     remove: (id: number) => del<{ deleted: boolean }>(`/themes/${id}`),
   },
 
@@ -131,6 +200,16 @@ export const api = {
     remove: (id: string) => del<{ deleted: boolean }>(`/pages/${id}`),
   },
 
+  // --- Community submissions (admin review queue) ---
+  submissions: {
+    list: (status: 'pending' | 'approved' | 'rejected' | 'all' = 'pending') =>
+      get<SubmissionConfig[]>(`/submissions?status=${status}`),
+    approve: (id: string, data: ApproveSubmissionInput) =>
+      post<{ submission: SubmissionConfig; item: PaperConfig | NoteConfig }>(`/submissions/${id}/approve`, data),
+    reject: (id: string) => post<SubmissionConfig>(`/submissions/${id}/reject`),
+    remove: (id: string) => del<{ deleted: boolean }>(`/submissions/${id}`),
+  },
+
   // --- Uploads ---
   uploads: {
     uploadFile: async (file: File): Promise<{ url: string; sizeLabel: string; filename: string }> => {
@@ -142,7 +221,7 @@ export const api = {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: form,
       });
-      if (!res.ok) throw new Error((await res.json()).message || 'Upload failed');
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || 'Upload failed');
       return res.json();
     },
     submit: async (file: File, meta: {
@@ -152,7 +231,7 @@ export const api = {
       form.append('file', file);
       Object.entries(meta).forEach(([k, v]) => v && form.append(k, v));
       const res = await fetch(`${BASE}/uploads/submit`, { method: 'POST', body: form });
-      if (!res.ok) throw new Error((await res.json()).message || 'Submit failed');
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || 'Submit failed');
       return res.json();
     },
   },

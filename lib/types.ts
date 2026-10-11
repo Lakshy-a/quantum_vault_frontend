@@ -46,6 +46,7 @@ export interface PaperConfig {
   semester: number;
   color: string;
   textColor: string;
+  fileUrl?: string | null;
 }
 
 export interface NoteConfig {
@@ -58,12 +59,20 @@ export interface NoteConfig {
   type: string;
   pages: string;
   size: string;
+  fileUrl?: string | null;
+}
+
+export interface SubjectConfig {
+  _id?: number;
+  name: string;
+  code: string;
 }
 
 export interface SemesterConfig {
+  _id?: number;
   num: string;
   count: string;
-  subjects: { name: string; code: string }[];
+  subjects: SubjectConfig[];
 }
 
 export interface BranchSyllabusConfig {
@@ -82,6 +91,28 @@ export interface SiteConfig {
   syllabus: BranchSyllabusConfig[];
   customPages: CustomPageConfig[];
   adminPassword?: string;
+}
+
+export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface SubmissionConfig {
+  id: string;
+  originalName: string;
+  fileUrl: string;
+  mimetype: string;
+  size: number;
+  sizeLabel: string;
+  subject: string;
+  branch: string;
+  semester: string;
+  year?: string | null;
+  code?: string | null;
+  type: string;
+  status: SubmissionStatus;
+  reviewedAt?: string | null;
+  resultKind?: 'paper' | 'note' | null;
+  resultId?: string | null;
+  createdAt: string;
 }
 
 export interface CustomPageConfig {

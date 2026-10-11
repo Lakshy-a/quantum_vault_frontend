@@ -88,9 +88,10 @@ export async function loadConfigFromAPI(): Promise<SiteConfig> {
       sub: b.sub,
       dot: b.dot,
       semesters: (b.semesters || []).sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((s: any) => ({
+        _id: s.id,
         num: s.num,
         count: s.count,
-        subjects: (s.subjects || []).map((sub: any) => ({ name: sub.name, code: sub.code })),
+        subjects: (s.subjects || []).map((sub: any) => ({ _id: sub.id, name: sub.name, code: sub.code })),
       })),
     }));
     return { ...config, themes, branches, syllabus };

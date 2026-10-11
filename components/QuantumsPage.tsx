@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Page, PaperConfig, BranchConfig } from '@/lib/types';
 import { HoverButton, HoverChip, HoverQCard } from './Hover';
+import { api, fileHref } from '@/lib/api';
 
 interface QuantumsPageProps { onNav: (page: Page) => void; onToast: (msg: string) => void; papers: PaperConfig[]; branches: BranchConfig[]; }
 
@@ -13,6 +14,12 @@ export function QuantumsPage({ onNav, onToast, papers, branches }: QuantumsPageP
   const [activeYear, setActiveYear] = useState('All Years');
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+
+  const openPaper = (p: PaperConfig) => {
+    if (!p.fileUrl) return onToast('No file attached to this paper yet');
+    api.papers.download(p.id).catch(() => {}); // best-effort download counter
+    window.open(fileHref(p.fileUrl), '_blank', 'noopener');
+  };
   const years = ['All Years', '2024', '2023', '2022', '2021'];
   const sidebarBranches = [{ label: 'All Branches', count: papers.length.toString() }, ...branches.map(b => ({ label: b.label, count: papers.filter(p => p.branch === b.code).length.toString() }))];
   const sidebarSems = [1,2,3,4,5,6,7,8].map(n => ({ label: `Semester ${n}`, count: papers.filter(p => p.semester === n).length.toString() }));
@@ -82,7 +89,7 @@ export function QuantumsPage({ onNav, onToast, papers, branches }: QuantumsPageP
           </div>
           <div className="q-card-grid" style={{ display: 'grid', gap: '12px' }}>
             {paginated.map((p, i) => (
-              <HoverQCard key={p.id || i} onClick={() => onToast('Opening paper…')}>
+              <HoverQCard key={p.id || i} onClick={() => openPaper(p)}>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', color: 'var(--ink3)', letterSpacing: '1px' }}>{p.tag}</div>
                 <div style={{ fontSize: '13px', fontWeight: 500, lineHeight: 1.4, flex: 1 }}>{p.title}</div>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center', paddingTop: '.5rem', borderTop: '1px solid var(--bd)', flexWrap: 'wrap' }}>

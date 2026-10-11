@@ -91,7 +91,7 @@ export function UploadPage({ onToast, branches }: UploadPageProps) {
               onChange={e => handleFile(e.target.files?.[0] ?? null)}
             />
             <Hv
-              base={{ background: file ? 'rgba(61,186,126,.04)' : 'var(--bg2)', border: `2px dashed ${file ? 'var(--green)' : dragOver ? 'var(--accent)' : 'var(--bd2)'}`, borderRadius: '12px', padding: 'clamp(1.5rem,4vw,3rem) 2rem', textAlign: 'center' as const, cursor: 'pointer', transition: 'all .2s' }}
+              base={{ background: file ? 'rgba(61,186,126,.04)' : 'var(--bg2)', borderWidth: '2px', borderStyle: 'dashed', borderColor: file ? 'var(--green)' : dragOver ? 'var(--accent)' : 'var(--bd2)', borderRadius: '12px', padding: 'clamp(1.5rem,4vw,3rem) 2rem', textAlign: 'center' as const, cursor: 'pointer', transition: 'all .2s' }}
               hover={{ borderColor: 'var(--accent)', background: 'rgba(200,169,110,.04)' }}
               onClick={() => fileRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}

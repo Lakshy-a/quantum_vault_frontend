@@ -69,20 +69,20 @@ export function HoverButton({ children, style, onClick, variant = 'primary', dis
 
   const variants = {
     primary: {
-      base: { background: 'var(--accent)', border: 'none', color: 'var(--bg)', fontWeight: 500 },
+      base: { background: 'var(--accent)', borderWidth: '0', borderStyle: 'none', borderColor: 'transparent', color: 'var(--bg)', fontWeight: 500 },
       hover: { background: 'var(--accent2)', transform: 'translateY(-1px)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
     },
     outline: {
-      base: { background: 'transparent', border: '1px solid var(--bd2)', color: 'var(--ink2)' },
-      hover: { border: '1px solid var(--accent)', color: 'var(--accent)' },
+      base: { background: 'transparent', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--bd2)', color: 'var(--ink2)' },
+      hover: { borderColor: 'var(--accent)', color: 'var(--accent)' },
     },
     ghost: {
-      base: { background: 'transparent', border: '1px solid var(--bd2)', color: 'var(--ink2)' },
-      hover: { border: '1px solid var(--ink2)', color: 'var(--ink)', background: 'var(--bg3)' },
+      base: { background: 'transparent', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--bd2)', color: 'var(--ink2)' },
+      hover: { borderColor: 'var(--ink2)', color: 'var(--ink)', background: 'var(--bg3)' },
     },
     danger: {
-      base: { background: 'rgba(224,90,90,.1)', border: '1px solid rgba(224,90,90,.2)', color: 'var(--red)' },
-      hover: { background: 'rgba(224,90,90,.2)', border: '1px solid rgba(224,90,90,.4)' },
+      base: { background: 'rgba(224,90,90,.1)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(224,90,90,.2)', color: 'var(--red)' },
+      hover: { background: 'rgba(224,90,90,.2)', borderColor: 'rgba(224,90,90,.4)' },
     },
   };
 
